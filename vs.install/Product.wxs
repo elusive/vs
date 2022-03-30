@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?define Name="vs" ?>
+<?define Description="Utility to launch Visual Studio 2022" ?>
+<?define Manufacturer="Elusive" ?>
+<?define Version="0.0.1" ?>
+<?define UpgradeCode="{8A9438DF-5D01-4381-9965-A2868356FBD2}" ?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<?define vs_TargetDir=$(var.vs.TargetDir) ?>
+	<Product 
+		Id="*" 
+		Name="$(var.Name)" 
+		Language="1033" 
+		Version="$(var.Version)" 
+		Manufacturer="$(var.Manufacturer)"
+		UpgradeCode="$(var.UpgradeCode)">
+		
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+	
+		<MediaTemplate />
+
+		<Feature Id="ProductFeature" Title="$(var.Name)" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+	</Product>
+	
+
+	<!--  Fragment with installation directory details  -->
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+				<Directory Id="ROOTDIRECTORY" Name="$(var.Manufacturer)">
+					<Directory Id="INSTALLFOLDER" Name="$(var.Name)"></Directory>
+				</Directory>
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	
+	<!--  Main fragment with application executable  -->
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+			 <Component Id="vs.exe" Guid="{AAC5E5AE-67A4-4435-8CA3-69964F06EB19}">
+				 <File Id="vs.exe" Name="vs.exe" Source="$(var.vs_TargetDir)vs.exe" />
+				 <File Id="vs.dll" Name="vs.dll" Source="$(var.vs_TargetDir)vs.dll" />
+				 <File Id="vs.deps.json" Name="vs.deps.json" Source="$(var.vs_TargetDir)vs.deps.json" />
+				 <File Id="McMaster.Extensions.CommandLineUtils.dll" Name="McMaster.Extensions.CommandLineUtils.dll" Source="$(var.vs_TargetDir)McMaster.Extensions.CommandLineUtils.dll" />
+				 <File Id="vs.runtimeconfig.json" Name="vs.runtimeconfig.json" Source="$(var.vs_TargetDir)vs.runtimeconfig.json" />
+			 </Component> 
+			<Component Id="setEnvironment" Guid="{06AEFCC4-21F3-4F89-A3FA-7062C74FBE2A}">
+				<CreateFolder />
+				<Environment
+					Id="PATH"
+				    Name="PATH"
+				    Value="[INSTALLFOLDER]"
+				    Permanent="yes"
+				    Part="last"
+				    Action="set"
+				    System="yes" />		
+				</Component>
+		</ComponentGroup>
+	</Fragment>
+
+</Wix>
