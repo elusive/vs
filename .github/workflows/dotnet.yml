@@ -28,7 +28,7 @@ jobs:
       run: dotnet build vs/vs.csproj --no-restore
     - name: Build Setup
       run: |
-        wix\tools\candle.exe Product.wxs -o obj\ -ext WixUtilExtension
+        wix\tools\candle.exe vs.install\Product.wxs -o obj\ -ext WixUtilExtension
         wix\tools\light.exe obj\*.wixobj -o bin\vs.install.msi -ext WixUtilExtension""
     - name: Create Release
       id: create_release
