@@ -1,0 +1,29 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build_release:
+  
+    runs-on: windows-latest
+  
+    steps:
+    - name: Install Wix
+      uses: actions/checkout@v3
+      with:
+        repository: fbarresi/wix
+        path: wix
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: 1.0.${{ github.run_number }}
+        release_name: 1.0.${{ github.run_number }}
+        draft: false
+        prerelease: false
