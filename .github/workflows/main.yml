@@ -1,0 +1,10 @@
+name: Main branch workflow
+
+on:
+	pull_request:
+	  branches: 
+	    - main
+
+jobs:
+  call-workflow:
+    uses: elusive/vs/.github/workflows/dotnet.yml
