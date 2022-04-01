@@ -25,11 +25,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build vs/vs.csproj --no-restore
     - name: Build Setup
       run: |
-        wix\tools\candle.exe Product.wxs -o obj\ -ext WixUtilExtension -ext WixUIExtension
-        wix\tools\light.exe obj\*.wixobj -o bin\Installer.msi -ext WixUtilExtension""
+        wix\tools\candle.exe Product.wxs -o obj\ -ext WixUtilExtension
+        wix\tools\light.exe obj\*.wixobj -o bin\vs.install.msi -ext WixUtilExtension""
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
