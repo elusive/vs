@@ -1,8 +1,11 @@
-﻿namespace vs 
+﻿namespace vs
 {
+    using McMaster.Extensions.CommandLineUtils;
     using System;
     using System.Diagnostics;
-    using McMaster.Extensions.CommandLineUtils;
+    using System.IO;
+    using System.Linq;
+    using System.Threading;
 
 
     [Command(Name = "Visual Studio Driver", 
@@ -112,7 +115,7 @@ file name that has the same base name as the project file.
             Verbose,
         }
 
-        private string GetVsCommand() 
+        private static string GetVsCommand() 
         {
             // determine version of vs available
             // currently only VS 2022 is supported
