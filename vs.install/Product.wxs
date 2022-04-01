@@ -7,7 +7,7 @@
 <?define UpgradeCode="{8A9438DF-5D01-4381-9965-A2868356FBD2}" ?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<?define vs_TargetDir=$(var.vs.TargetDir) ?>
+	<?define vs_TargetDir="../vs/bin/Release/net5.0/" ?>
 	<Product 
 		Id="*" 
 		Name="$(var.Name)" 
