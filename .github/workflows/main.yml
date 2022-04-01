@@ -7,4 +7,4 @@ on:
 
 jobs:
   call-workflow:
-    uses: elusive/vs/.github/workflows/dotnet.yml
+    uses: elusive/vs/.github/workflows/dotnet.yml@main
