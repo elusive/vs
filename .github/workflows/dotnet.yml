@@ -12,6 +12,12 @@ jobs:
     - name: Checkout Source
       uses: actions/checkout@v3
 
+    - name: Install Wix
+      uses: actions/checkout@v3
+      with:
+        repository: fbarresi/wix
+        path: wix
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
