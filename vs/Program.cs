@@ -1,14 +1,16 @@
 ﻿namespace vs
 {
     using McMaster.Extensions.CommandLineUtils;
+
+    using Microsoft.Extensions.Configuration;
+
     using System;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Threading;
 
-
-    [Command(Name = "Visual Studio Driver", 
+    [Command(Name = "Visual Studio Driver",
         Description = "Opens a solution or directory in Visual Studio from the command line.",
         ExtendedHelpText = @"
 Arguments are passed to devenv.exe:
@@ -24,14 +26,15 @@ file name that has the same base name as the project file.
     [HelpOption("-?|-h|--help")]
     public class Program
     {
-        const string SolutionFileType = "sln";
-        const string Vs2022Enterprise = @"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\devenv.exe";
-        const string Vs2022Professional = @"C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\IDE\devenv.exe";
+        public const string SolutionFileType = "sln";
+        public const string ProjectFileType = "csproj";
+
+        public static IConfigurationRoot Configuration { get; private set; }
 
         /// <summary>
         /// Main method
         /// </summary>
-        public static int Main(string[] args) => 
+        public static int Main(string[] args) =>
             CommandLineApplication.Execute<Program>(args);
 
         /// <summary>
@@ -45,49 +48,69 @@ file name that has the same base name as the project file.
         {
             try
             {
+                // load configuration from json
+                Configuration = new ConfigurationBuilder()
+                    .AddJsonFile("appSettings.json")
+                    .Build();
+
                 // output provided value
                 LogTrace(TraceLevel.Verbose, $"Path entered as: {Path}");
                 if (string.IsNullOrEmpty(Path)) app.ShowHelp();
 
-                // resolve path 
+                // resolve path
                 var path = System.IO.Path.GetFullPath(Path);
                 LogTrace(TraceLevel.Info, $"Path resolved: {path}");
 
-                // look for solution file
-
-                if (File.Exists(path) && System.IO.Path.GetExtension(path) == $".{SolutionFileType}")  // already a file path
+                // look for solution file or project file
+                if (Helper.IsVisualStudioFile(path))
                 {
-                    var cmd = GetVsCommand();
+                    var cmd = Helper.GetVsCommand();
                     Process.Start(cmd, path);
                     LogTrace(TraceLevel.Info, $"Executing {cmd} with parameter {path}");
                     return 0;
                 }
 
-                if (Directory.Exists(path))     // no file only directory
+                // no file so check directory
+                if (Directory.Exists(path))
                 {
+                    // find a solution file to open
                     var sln = Directory.GetFiles(
                         path,
                         $"*.{SolutionFileType}",
                         SearchOption.TopDirectoryOnly)
                         .FirstOrDefault();
-                    LogTrace(TraceLevel.Info, $"Solution file: {sln}");
+                    LogTrace(TraceLevel.Verbose, $"Solution file: {sln}");
                     if (sln != null)
                     {
-                        var cmd = GetVsCommand();
+                        var cmd = Helper.GetVsCommand();
                         Process.Start(cmd, sln);
                         LogTrace(TraceLevel.Info, $"Executing {cmd} with parameter {path}");
                         return 0;
                     }
-                    else
+
+                    // find a project file in the path -R
+                    var proj = Directory.GetFiles(
+                        path,
+                        $"*.{ ProjectFileType}",
+                        SearchOption.AllDirectories)
+                        .FirstOrDefault();
+                    LogTrace(TraceLevel.Verbose, $"Project file: {proj}");
+                    if (proj != null)
                     {
-                        LogTrace(TraceLevel.Info, "Failed to find an sln file in this folder.");
-                        app.ShowHelp();
-                        return -1;
+                        var cmd = Helper.GetVsCommand();
+                        Process.Start(cmd, proj);
+                        LogTrace(TraceLevel.Info, $"Executing {cmd} with parameter {path}");
+                        return 0;
                     }
+                    
+                    LogTrace(TraceLevel.Info, "Failed to find an sln file in this folder.");
+                    app.ShowHelp();
+                    return -1;
                 }
 
+                // failed
                 LogTrace(TraceLevel.Info, "Failed to launch Visual Studio.");
-                return -1;  // failed
+                return -1; 
             }
             catch (Exception ex)
             {
@@ -97,7 +120,7 @@ file name that has the same base name as the project file.
         }
 
         /// <summary>
-        /// Property types of ValueTuple{bool,T} translate to 
+        /// Property types of ValueTuple{bool,T} translate to
         /// CommandOptionType.SingleOrNoValue
         /// Input            | Value
         /// ------------------------------------------------
@@ -109,30 +132,13 @@ file name that has the same base name as the project file.
         [Option]
         public (bool HasValue, TraceLevel level) Trace { get; }
 
-        public enum TraceLevel 
+        public enum TraceLevel
         {
             Info = 0,
             Verbose,
         }
 
-        private static string GetVsCommand() 
-        {
-            // determine version of vs available
-            // currently only VS 2022 is supported
-            if (File.Exists(Vs2022Professional))
-            {
-                return Vs2022Professional;
-            }
-            else if (File.Exists(Vs2022Enterprise))
-            {
-                return Vs2022Enterprise;
-            }
-            else 
-            {
-                throw new System.InvalidOperationException(
-                        "Visual Studio 2022 is not installed on this system.");
-            }
-        }
+
 
         private void LogTrace(TraceLevel level, string message)
         {

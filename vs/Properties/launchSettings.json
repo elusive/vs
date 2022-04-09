@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "vs": {
-      "commandName": "Project",
-      "commandLineArgs": ". --trace:verbose"
-    }
-  }
-}
