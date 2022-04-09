@@ -1,7 +1,7 @@
 ﻿namespace vs
 {
     using McMaster.Extensions.CommandLineUtils;
-
+    
     using Microsoft.Extensions.Configuration;
 
     using System;
